@@ -1,0 +1,62 @@
+---
+title: "NYC Flights Exploration"
+author: "Oliver Speltz"
+date: "1/15/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+# include functions to generate charts
+source("../functions_for_report.R")
+```
+
+## Data Sources
+
+[nycflights13](https://cran.r-project.org/web/packages/nycflights13/index.html) is an R package containing data on flights that departed from any of the 3 airports in New York City in 2013. Contained in the package is data on 340,000 flights, and useful metadata on weather conditions in 2013, airports, and airlines that are included in the data set. The data set only includes domestic flights.
+
+There are many carriers included in the data set, but many with insignificant numbers to make judgement on. The following carriers have quite consistent numbers of flights throughout the year.
+```{r carriers by year, echo=FALSE}
+thresh = 100
+monthly_flight_volume(thresh)
+```
+This chart excludes any carrier that has less than `r thresh` flights in a month. The four largest carriers consistently make up more than half of the flights in each month.
+
+## Departure Delay
+
+A particularly interesting field on the flights data set was `dep_delay`, which represented the number of minutes before or after the scheduled departure time that the plane truly departed. One might be interested in this value if trying to assess the likelihood of their flight departing, or arriving at their destination, on time. To explore this value, I broke down the departure delay by some of the various parameters that an airtraveler would have available to them. 
+
+### By hour
+
+Perhaps the most basic data someone would have on an upcoming flight, is the departure time. 
+```{r departure delay by hour, echo=FALSE}
+delay_by_hour()
+```
+Here we see that the scheduled hour of departure has a significant effect on the delay of the departure. Earlier flights tend to leave closer to the intended flights than those in the evening, then the delay drops off again as we get into the late evening. This aligns with expectations as most people avoid flights outside of normal waking hours, leaving the airport less busy. 
+
+### By carrier
+
+A further useful piece of information that your average traveler would have readily available is what airline they are flying with.
+
+```{r departure delay by carrier, echo=FALSE}
+thresh = 1000
+delay_by_carrier(thresh)
+```
+This chart excludes carriers with fewer than `r thresh` flights in the year.
+
+While this does not control for other variables, such as time of departure, and weather conditions, it does seem indicative that some flight carriers have a better track records at getting their planes off the ground on time. The tight 95% confidence intervals give us a good idea that the sample means here are close to the true mean. 
+
+### By date
+
+One might also expect that the time of year would have an effect on the delay times at airports. 
+
+```{r departure delay by date, echo=FALSE}
+window = 14
+delay_by_date(window)
+```
+
+Show above is the `r window` day rolling average number of flights (flight volume) and average departure delay for the `r window` day window ending on the specified date. Things do not quite look as expected here. There is an odd dip in flight volume in February of 2013, and a smaller than expected spike in volume around Christmas and Thanksgiving. Departure delay does not always seem very well correlated to the flight volume. During the holiday season, they line up pretty well but in other times of year they seem inversely correlated. The largest spike in departure delay comes over the summer, it suspiciously begins right around my birthday. There are many unaccounted for factors that could be contributing to these results, for example, we do have the number of flights in a day, but we do not have the number of tickets sold for each, or the number of staff at the airport that day.
+
+## Results
+
+If you are interested in maximizing your airport efficiency, the best thing you can count on is booking flights outside of your standard 9-5 time period. The more you fly outside of those busy hours, the more likely your flight is to depart on time. When in doubt though, it is always best to plan with caution and give yourself ample time on either side of your flight for any logistical difficulties.
